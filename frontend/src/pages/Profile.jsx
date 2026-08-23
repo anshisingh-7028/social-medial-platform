@@ -29,11 +29,13 @@ const Profile = () => {
   // =====================================
   // CHECK PROFILE OWNER
   // =====================================
+const currentUserId =
+  currentUser?._id?.toString() ||
+  currentUser?.id?.toString();
 
-  const isOwnProfile =
-    !userId ||
-    userId === currentUser?._id?.toString();
-
+const isOwnProfile =
+  !userId ||
+  userId.toString() === currentUserId;
   // =====================================
   // PROFILE USER
   // =====================================
@@ -92,98 +94,80 @@ const Profile = () => {
   // =====================================
   // LOAD PROFILE
   // =====================================
+useEffect(() => {
+  const loadProfile = async () => {
+    if (!currentUser) return;
 
-  useEffect(() => {
-    const loadProfile = async () => {
-      try {
-        setLoadingProfile(true);
+    try {
+      setLoadingProfile(true);
 
-        // ================================
-        // OWN PROFILE
-        // ================================
+      if (isOwnProfile) {
+        const data = await getProfile();
 
-        if (isOwnProfile) {
-          const data =
-            await getProfile();
+        if (data?.success && data?.user) {
+          const loadedUser = data.user;
 
-          if (data?.success) {
-            const loadedUser =
-              data.user;
+          setProfileUser(loadedUser);
 
-            setProfileUser(
-              loadedUser
-            );
-
-            setFormData({
-              name:
-                loadedUser?.name || "",
-              username:
-                loadedUser?.username ||
-                "",
-              bio:
-                loadedUser?.bio || "",
-              avatar:
-                loadedUser?.avatar ||
-                "",
-            });
-
-            setIsFollowing(false);
-          }
-
-          return;
+          setFormData({
+            name: loadedUser?.name || "",
+            username: loadedUser?.username || "",
+            bio: loadedUser?.bio || "",
+            avatar: loadedUser?.avatar || "",
+          });
+        } else {
+          setProfileUser(null);
         }
 
-        // ================================
-        // OTHER USER PROFILE
-        // ================================
+        return;
+      }
 
-        const data =
-          await getUserById(userId);
+      const data = await getUserById(userId);
 
-        if (data?.success) {
-          const loadedUser =
-            data.user;
+      if (data?.success && data?.user) {
+        const loadedUser = data.user;
 
-          setProfileUser(
-            loadedUser
-          );
+        setProfileUser(loadedUser);
 
-          const following =
-            currentUser?.following ||
-            [];
+        const following =
+          currentUser?.following || [];
 
-          const followingStatus =
-            following.some(
-              (id) =>
-                (
-                  id?._id || id
-                )?.toString() ===
-                loadedUser?._id?.toString()
-            );
-
-          setIsFollowing(
-            followingStatus
-          );
-        }
-      } catch (error) {
-        console.error(
-          "LOAD PROFILE ERROR:",
-          error
+        const followingStatus = following.some(
+          (id) =>
+            (id?._id || id).toString() ===
+            loadedUser?._id?.toString()
         );
 
+        setIsFollowing(followingStatus);
+      } else {
         setProfileUser(null);
-      } finally {
-        setLoadingProfile(false);
       }
-    };
 
-    if (currentUser?._id) {
-      loadProfile();
+    } catch (error) {
+      console.error(
+        "LOAD PROFILE ERROR:",
+        error
+      );
+
+      console.error(
+        "SERVER ERROR:",
+        error.response?.data
+      );
+
+      setProfileUser(null);
+
+    } finally {
+      setLoadingProfile(false);
     }
-  }, [
-    userId,
-    currentUser?._id,
-  ]);
+  };
+
+  loadProfile();
+
+}, [
+  userId,
+  currentUser?._id,
+  currentUser?.id,
+]);
 
   // =====================================
   // LOAD USER POSTS
