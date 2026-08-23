@@ -2,7 +2,7 @@ import axios from "axios";
 
 const API_URL =
   import.meta.env.VITE_API_URL ||
-  "http://localhost:5000/api";
+  "http://localhost:5000";
 
 const getToken = () => {
   return (
@@ -18,20 +18,18 @@ const config = () => ({
   },
 });
 
-
 // =====================================
 // GET OR CREATE CONVERSATION
 // =====================================
 
 export const getOrCreateConversation = async (userId) => {
   const response = await axios.get(
-    `${API_URL}/chat/conversation/${userId}`,
+    `${API_URL}/api/chat/conversation/${userId}`,
     config()
   );
 
   return response.data;
 };
-
 
 // =====================================
 // GET MESSAGES
@@ -39,13 +37,12 @@ export const getOrCreateConversation = async (userId) => {
 
 export const getMessages = async (conversationId) => {
   const response = await axios.get(
-    `${API_URL}/chat/messages/${conversationId}`,
+    `${API_URL}/api/chat/messages/${conversationId}`,
     config()
   );
 
   return response.data;
 };
-
 
 // =====================================
 // SEND MESSAGE
@@ -56,7 +53,7 @@ export const sendMessage = async (
   text
 ) => {
   const response = await axios.post(
-    `${API_URL}/chat/messages/${conversationId}`,
+    `${API_URL}/api/chat/messages/${conversationId}`,
     {
       text,
     },
@@ -65,7 +62,6 @@ export const sendMessage = async (
 
   return response.data;
 };
-
 
 // =====================================
 // EDIT MESSAGE
@@ -76,7 +72,7 @@ export const editMessage = async (
   text
 ) => {
   const response = await axios.put(
-    `${API_URL}/chat/messages/${messageId}`,
+    `${API_URL}/api/chat/messages/${messageId}`,
     {
       text,
     },
@@ -86,22 +82,18 @@ export const editMessage = async (
   return response.data;
 };
 
-
 // =====================================
 // DELETE MESSAGE
 // =====================================
 
-export const deleteMessage = async (
-  messageId
-) => {
+export const deleteMessage = async (messageId) => {
   const response = await axios.delete(
-    `${API_URL}/chat/messages/${messageId}`,
+    `${API_URL}/api/chat/messages/${messageId}`,
     config()
   );
 
   return response.data;
 };
-
 
 // =====================================
 // GET MY CONVERSATIONS
@@ -109,7 +101,7 @@ export const deleteMessage = async (
 
 export const getMyConversations = async () => {
   const response = await axios.get(
-    `${API_URL}/chat/conversations`,
+    `${API_URL}/api/chat/conversations`,
     config()
   );
 

@@ -2,7 +2,7 @@ import axios from "axios";
 
 const API_URL =
   import.meta.env.VITE_API_URL ||
-  "http://localhost:5000/api";
+  "http://localhost:5000";
 
 // =====================================
 // AUTH CONFIG
@@ -25,7 +25,7 @@ const getConfig = () => {
 
 export const getPosts = async () => {
   const response = await axios.get(
-    `${API_URL}/posts`,
+    `${API_URL}/api/posts`,
     getConfig()
   );
 
@@ -38,7 +38,7 @@ export const getPosts = async () => {
 
 export const createPost = async (postData) => {
   const response = await axios.post(
-    `${API_URL}/posts`,
+    `${API_URL}/api/posts`,
     postData,
     getConfig()
   );
@@ -52,7 +52,7 @@ export const createPost = async (postData) => {
 
 export const toggleLike = async (postId) => {
   const response = await axios.put(
-    `${API_URL}/posts/${postId}/like`,
+    `${API_URL}/api/posts/${postId}/like`,
     {},
     getConfig()
   );
@@ -64,12 +64,9 @@ export const toggleLike = async (postId) => {
 // ADD COMMENT
 // =====================================
 
-export const addComment = async (
-  postId,
-  text
-) => {
+export const addComment = async (postId, text) => {
   const response = await axios.post(
-    `${API_URL}/posts/${postId}/comment`,
+    `${API_URL}/api/posts/${postId}/comment`,
     {
       text,
     },
@@ -85,7 +82,7 @@ export const addComment = async (
 
 export const getFollowingFeed = async () => {
   const response = await axios.get(
-    `${API_URL}/posts/following`,
+    `${API_URL}/api/posts/following`,
     getConfig()
   );
 
@@ -98,7 +95,7 @@ export const getFollowingFeed = async () => {
 
 export const getUserPosts = async (userId) => {
   const response = await axios.get(
-    `${API_URL}/posts/user/${userId}`,
+    `${API_URL}/api/posts/user/${userId}`,
     getConfig()
   );
 
@@ -111,7 +108,7 @@ export const getUserPosts = async (userId) => {
 
 export const deletePost = async (postId) => {
   const response = await axios.delete(
-    `${API_URL}/posts/${postId}`,
+    `${API_URL}/api/posts/${postId}`,
     getConfig()
   );
 
