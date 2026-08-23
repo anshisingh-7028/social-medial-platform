@@ -43,6 +43,7 @@ const Sidebar = () => {
 
             <img
               src={
+                user?.profilePicture ||
                 user?.avatar ||
                 "https://ui-avatars.com/api/?name=" +
                   encodeURIComponent(

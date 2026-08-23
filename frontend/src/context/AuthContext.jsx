@@ -25,15 +25,14 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
 
   // =====================================
-  // GET CURRENT USER
+  // CHECK EXISTING LOGIN
   // =====================================
 
   useEffect(() => {
-    const fetchUser = async () => {
+    const checkAuth = async () => {
       const savedToken =
         localStorage.getItem("token");
 
-      // Token nahi hai
       if (!savedToken) {
         setUser(null);
         setToken(null);
@@ -46,28 +45,21 @@ export const AuthProvider = ({ children }) => {
           await getCurrentUser(savedToken);
 
         console.log(
-          "CURRENT USER RESPONSE:",
+          "CURRENT USER:",
           data
         );
 
-        // API response ke different possible formats
-        const currentUser =
-          data?.user ||
-          data?.data?.user ||
-          data?.data ||
-          null;
-
-        if (currentUser) {
-          setUser(currentUser);
+        if (data?.success && data?.user) {
+          setUser(data.user);
           setToken(savedToken);
         } else {
           throw new Error(
-            "User data not found"
+            "Invalid user response"
           );
         }
       } catch (error) {
         console.error(
-          "User fetch error:",
+          "AUTH CHECK ERROR:",
           error
         );
 
@@ -80,16 +72,16 @@ export const AuthProvider = ({ children }) => {
       }
     };
 
-    fetchUser();
+    checkAuth();
   }, []);
 
   // =====================================
-  // SOCKET.IO CONNECTION
+  // SOCKET
   // =====================================
 
   useEffect(() => {
     const userId =
-      user?._id || user?.id;
+      user?.id || user?._id;
 
     if (!userId) {
       return;
@@ -123,42 +115,40 @@ export const AuthProvider = ({ children }) => {
   // =====================================
 
   const login = async (userData) => {
-    const data =
-      await loginUser(userData);
+    try {
+      const data =
+        await loginUser(userData);
 
-    console.log(
-      "LOGIN RESPONSE:",
-      data
-    );
-
-    const newToken =
-      data?.token ||
-      data?.data?.token;
-
-    const loggedInUser =
-      data?.user ||
-      data?.data?.user;
-
-    if (!newToken) {
-      throw new Error(
-        "Token not received from server"
+      console.log(
+        "LOGIN RESPONSE:",
+        data
       );
+
+      if (!data?.token) {
+        throw new Error(
+          "Token not received"
+        );
+      }
+
+      // Save token
+      localStorage.setItem(
+        "token",
+        data.token
+      );
+
+      // Update React state
+      setToken(data.token);
+      setUser(data.user);
+
+      return data;
+    } catch (error) {
+      console.error(
+        "LOGIN ERROR:",
+        error
+      );
+
+      throw error;
     }
-
-    // Save token
-    localStorage.setItem(
-      "token",
-      newToken
-    );
-
-    setToken(newToken);
-
-    // Set user immediately
-    if (loggedInUser) {
-      setUser(loggedInUser);
-    }
-
-    return data;
   };
 
   // =====================================
