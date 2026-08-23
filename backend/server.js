@@ -9,13 +9,20 @@ const authRoutes = require("./routes/authRoutes");
 const userRoutes = require("./routes/userRoutes");
 const postRoutes = require("./routes/postRoutes");
 const notificationRoutes = require("./routes/notificationRoutes");
-const chatRoutes =
-  require("./routes/chatRoutes");
+const chatRoutes = require("./routes/chatRoutes");
 
 dotenv.config();
 
 const app = express();
 
+// =====================================
+// ALLOWED FRONTEND ORIGINS
+// =====================================
+
+const allowedOrigins = [
+  "http://localhost:5173",
+  "https://social-medial-platform-nu.vercel.app",
+];
 
 // =====================================
 // MIDDLEWARE
@@ -23,43 +30,40 @@ const app = express();
 
 app.use(
   cors({
-    origin: "http://localhost:5173",
+    origin: function (origin, callback) {
+      // Allow requests without origin
+      // such as Postman/server-to-server requests
+      if (!origin) {
+        return callback(null, true);
+      }
+
+      if (allowedOrigins.includes(origin)) {
+        return callback(null, true);
+      }
+
+      return callback(
+        new Error("Not allowed by CORS")
+      );
+    },
     credentials: true,
   })
 );
 
 app.use(express.json());
 
-
 // =====================================
 // ROUTES
 // =====================================
 
-app.use(
-  "/api/auth",
-  authRoutes
-);
+app.use("/api/auth", authRoutes);
 
-app.use(
-  "/api/users",
-  userRoutes
-);
+app.use("/api/users", userRoutes);
 
-app.use(
-  "/api/posts",
-  postRoutes
-);
+app.use("/api/posts", postRoutes);
 
-app.use(
-  "/api/notifications",
-  notificationRoutes
-);
+app.use("/api/notifications", notificationRoutes);
 
-app.use(
-  "/api/chat",
-  chatRoutes
-);
-
+app.use("/api/chat", chatRoutes);
 
 // =====================================
 // BASIC ROUTE
@@ -72,14 +76,11 @@ app.get("/", (req, res) => {
   });
 });
 
-
 // =====================================
 // HTTP SERVER
 // =====================================
 
-const server =
-  http.createServer(app);
-
+const server = http.createServer(app);
 
 // =====================================
 // SOCKET.IO
@@ -87,7 +88,7 @@ const server =
 
 const io = new Server(server, {
   cors: {
-    origin: "http://localhost:5173",
+    origin: allowedOrigins,
     methods: ["GET", "POST"],
     credentials: true,
   },
@@ -95,43 +96,29 @@ const io = new Server(server, {
 
 app.set("io", io);
 
-
 // =====================================
 // SOCKET CONNECTION
 // =====================================
 
 io.on("connection", (socket) => {
- // USER JOINS HIS OWN ROOM
+  // USER JOINS HIS OWN ROOM
 
-  socket.on(
-    "join",
-    (userId) => {
+  socket.on("join", (userId) => {
+    if (!userId) return;
 
-      if (!userId) return;
+    socket.join(userId.toString());
 
-      socket.join(
-        userId.toString()
-      );
-
-      console.log(
-        `User ${userId} joined room`
-      );
-
-    }
-  );
-
+    console.log(
+      `User ${userId} joined room`
+    );
+  });
 
   // DISCONNECT
 
-  socket.on(
-    "disconnect",
-    () => {
-
-    }
-  );
-
+  socket.on("disconnect", () => {
+    console.log("User disconnected");
+  });
 });
-
 
 // =====================================
 // DATABASE
@@ -140,33 +127,24 @@ io.on("connection", (socket) => {
 mongoose
   .connect(process.env.MONGO_URL)
   .then(() => {
-
-    console.log(
-      "MongoDB Connected"
-    );
-
+    console.log("MongoDB Connected");
 
     // START SERVER
 
     server.listen(
       process.env.PORT || 5000,
       () => {
-
         console.log(
           `Server running on port ${
             process.env.PORT || 5000
           }`
         );
-
       }
     );
-
   })
   .catch((error) => {
-
     console.error(
       "MongoDB Connection Error:",
       error
     );
-
   });
