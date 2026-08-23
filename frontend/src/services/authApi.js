@@ -5,33 +5,39 @@ const API = axios.create({
   withCredentials: true,
 });
 
+// =====================================
+// REGISTER
+// =====================================
 
-// Register
 export const registerUser = async (userData) => {
   const response = await API.post(
-    "/auth/register",
+    "/api/auth/register",
     userData
   );
 
   return response.data;
 };
 
+// =====================================
+// LOGIN
+// =====================================
 
-// Login
 export const loginUser = async (userData) => {
   const response = await API.post(
-    "/auth/login",
+    "/api/auth/login",
     userData
   );
 
   return response.data;
 };
 
+// =====================================
+// GET CURRENT USER
+// =====================================
 
-// Get current user
 export const getCurrentUser = async (token) => {
   const response = await API.get(
-    "/auth/me",
+    "/api/auth/me",
     {
       headers: {
         Authorization: `Bearer ${token}`,
@@ -41,6 +47,5 @@ export const getCurrentUser = async (token) => {
 
   return response.data;
 };
-
 
 export default API;
