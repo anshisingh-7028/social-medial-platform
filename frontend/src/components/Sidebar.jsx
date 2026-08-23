@@ -9,7 +9,7 @@ const Sidebar = () => {
     {
       name: "Home",
       icon: "🏠",
-      path: "/",
+      path: "/home",
     },
     {
       name: "Explore",
